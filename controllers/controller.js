@@ -12,6 +12,7 @@ const createParticipant = async (req,res) => {
         console.log(created);
     }
     res.send(" Created ")
+    
 }
 
 const scheduleMeeting = async(req,res) => {
@@ -25,14 +26,12 @@ const scheduleMeeting = async(req,res) => {
     let Start = Date.parse(start);
 
     if(End - Start < 0){
-        res.send("Error, Please Enter Correct Dates");
+        res.send("Error, Please Enter Correct Date and Time");
     }
     // console.log(End, Start);
     // console.log(participant)
-    // let TimeCheck = Meeting.query().withGraphFetched("[participant]")
-    // if()
-
-    const scheduled = await Meeting.query().insertGraph([{ 
+    
+const scheduled = await Meeting.query().insertGraph([{ 
         Title : title,
         StartTime : Start,
         EndTime :  End,
@@ -59,11 +58,37 @@ const findMeeting = async(req,res) =>{
 const participantsAllMeeting = async(req,res) =>{ 
 
     let email = req.query.email;
-    // console.log(email);
+    console.log(email);
 
-    let details = await Participant.query().where("Email",email).withGraphFetched("[meeting]").returning("*");
+    const offset = parseInt(req.query.offset)
+    const limit = parseInt(req.query.limit)
 
+    const startIndex = (offset - 1) * limit
+    const endIndex = offset * limit
+    
+    if (startIndex > 0) {
+      results.previous = {
+        offset: offset - 1,
+        limit: limit
+      }
+    }
+
+    let details = await Participant.query()
+                    .where("Email",email)
+                    .withGraphFetched("[meeting]")
+                    .limit(limit)
+                    .offset(offset)
+                    .returning("*");
+
+
+    if (endIndex < await details.length) {
+        results.next = {
+            offset: offset + 1,
+            limit: limit
+        }
+    }
     if(details){
+        console.log("gggg")
         res.send(details);
     }
 }
@@ -75,10 +100,36 @@ const allMeetings = async(req,res) =>{
 
     let End = Date.parse(end);// in milliseconds
     let Start = Date.parse(start);    
-
     console.log(Start,End);
+
+    const offset = parseInt(req.query.offset)
+    const limit = parseInt(req.query.limit)
+
+    const startIndex = (offset - 1) * limit
+    const endIndex = offset * limit
+ 
+    if (startIndex > 0) {
+      results.previous = {
+        offset: offset - 1,
+        limit: limit
+      }
+    }
     
-    const Meetings = await Meeting.query().where("StartTime",Start).orWhere("EndTime",End).skipUndefined().returning("*");
+    const Meetings = await Meeting.query()
+                        .having("StartTime",">=",Start)
+                        .having("EndTime","<=",End)
+                        .skipUndefined().groupBy("id")
+                        .limit(limit)
+                        .offset(offset)
+                        .returning("*")
+
+    if (endIndex < await Meetings.length()) {
+        results.next = {
+            offset: offset + 1,
+            limit: limit
+        }
+    }
+
 
     if(Meetings){
         res.send(Meetings)
