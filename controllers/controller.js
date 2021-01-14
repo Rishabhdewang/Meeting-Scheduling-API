@@ -6,7 +6,7 @@ const createParticipant = async (req,res) => {
     let name = req.body.name;
     let email = req.body.email;
     let rspv = req.body.rspv;
-    console.log("hello " + name);
+    // console.log("hello " + name);
     const created = await Participant.query().insert({ Name : name, Email : email, RSPV : rspv });
     if (created) {
         console.log(created);
@@ -28,19 +28,33 @@ const scheduleMeeting = async(req,res) => {
     if(End - Start < 0){
         res.send("Error, Please Enter Correct Date and Time");
     }
+
+        
+
+    // const check = await Meeting.query()
+    //                     .having("StartTime",">=",Start)
+    //                     .having("EndTime","<=",End)
+    //                     .withGraphFetched("[part(SELECT)]")
+    //                     .modifiers({
+    //                         SELECT(builder){
+    //                             builder.where("Email",Email[Email])
+    //                         }
+    //                     })
+    //                     .skipUndefined().groupBy("id")
+    console.log(emails)
     // console.log(End, Start);
     // console.log(participant)
     
-const scheduled = await Meeting.query().insertGraph([{ 
-        Title : title,
-        StartTime : Start,
-        EndTime :  End,
-        part: participant,
-    }]);
+    // const scheduled = await Meeting.query().insertGraph([{ 
+    //     Title : title,
+    //     StartTime : Start,
+    //     EndTime :  End,
+    //     part: participant,
+    // }]);
     
-    if(scheduled){
-        res.send(scheduled)
-    }
+    // if(scheduled){
+    //     res.send(scheduled)
+    // }
 }
 
 const findMeeting = async(req,res) =>{ 
@@ -48,7 +62,7 @@ const findMeeting = async(req,res) =>{
     let id = req.params.id;
     // console.log(id);
 
-    let find = await Meeting.query().where("id",id);
+    let find = await Meeting.query().where("id",id).withGraphFetched("part");
 
     if(find){
         res.send(find);
