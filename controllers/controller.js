@@ -28,33 +28,18 @@ const scheduleMeeting = async(req,res) => {
     if(End - Start < 0){
         res.send("Error, Please Enter Correct Date and Time");
     }
-
-        
-
-    // const check = await Meeting.query()
-    //                     .having("StartTime",">=",Start)
-    //                     .having("EndTime","<=",End)
-    //                     .withGraphFetched("[part(SELECT)]")
-    //                     .modifiers({
-    //                         SELECT(builder){
-    //                             builder.where("Email",Email[Email])
-    //                         }
-    //                     })
-    //                     .skipUndefined().groupBy("id")
-    console.log(emails)
     // console.log(End, Start);
-    // console.log(participant)
     
-    // const scheduled = await Meeting.query().insertGraph([{ 
-    //     Title : title,
-    //     StartTime : Start,
-    //     EndTime :  End,
-    //     part: participant,
-    // }]);
+    const scheduled = await Meeting.query().insertGraph([{ 
+        Title : title,
+        StartTime : Start,
+        EndTime :  End,
+        part: participant,
+    }]);
     
-    // if(scheduled){
-    //     res.send(scheduled)
-    // }
+    if(scheduled){
+        res.send(scheduled)
+    }
 }
 
 const findMeeting = async(req,res) =>{ 
