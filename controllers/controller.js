@@ -1,18 +1,15 @@
 const Meeting = require("../model/meeting");
 const Participant = require("../model/participant");
 
-const createParticipant = async (req,res) => {
+const updateParticipant = async (req,res) => {
 
-    let name = req.body.name;
     let email = req.body.email;
     let rspv = req.body.rspv;
-    // console.log("hello " + name);
-    const created = await Participant.query().insert({ Name : name, Email : email, RSPV : rspv });
-    if (created) {
-        console.log(created);
+
+    const answerd = await Participant.query().update({ RSPV : rspv }).where("Email",email);
+    if (answerd) {
+    res.send(answerd)
     }
-    res.send(" Created ")
-    
 }
 
 const scheduleMeeting = async(req,res) => {
@@ -138,7 +135,7 @@ const allMeetings = async(req,res) =>{
 }
 
 module.exports = { 
-    createParticipant,
+    updateParticipant,
     scheduleMeeting,
     findMeeting,
     participantsAllMeeting,
